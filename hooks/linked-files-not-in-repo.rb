@@ -1,44 +1,44 @@
 require 'nokogiri'
+require_relative 'result'
 
-puts 'Checking linked files in your csproj are not in the repository...'
+module RighteousGitHooks
 
-def DebugLog(message)
-	# This should check for an env var, but can't get it working on windows...
-	puts message
+	class LinkedFilesChecker
+
+		def initialize(git_root, project_dir, csproj_filename)
+			@git_root = git_root
+			@project_dir = project_dir
+			@csproj_filename = csproj_filename
+		end
+
+		def make_it_so!()
+			
+			puts 'Checking linked files in your csproj are not in the repository...'
+			csproj_path = File.join(@git_root, @project_dir, @csproj_filename)
+
+			return Result.error("Cannot find #{csproj_path}") unless File.exists? csproj_path
+
+			puts "Checking csproj: '#{csproj_path}'"
+			csproj = Nokogiri::XML(File.read(csproj_path))
+			sins = []
+			# CSS Selectors for maximum coolness (also XPath sucks)
+			csproj.css('ItemGroup > Content > Link').each do |link|
+				# Get the repo-relative path for each file with unix-style path separators
+				path = File.join(@project_dir, link.text.gsub('\\', '/'))
+				# Check the file is not staged in Git. An empty response means it's not staged
+				result = `git ls-files --stage #{path}`
+				sins.push(result) unless result.empty?
+			end
+
+			return Result.success("Congratulations, this is a righteous commit!") if sins.empty?
+
+			message = "\nYou have sinned! The following files are csproj links, but exist in your repo..."
+			sins.each do |sin|
+				message = message + "\n#{sin}"
+			end
+			message = message + "\nPlease delete them before committing. You may need to add them to .gitignore as well."
+			
+			return Result.error(message)
+		end
+	end
 end
-
-git_root = File.absolute_path(File.dirname(__FILE__) + '/..')
-
-DebugLog "The root of your git repo is at '#{git_root}'"
-
-relative_project_dir = 'project/root/in/repo'
-project_dir = File.join(git_root, relative_project_dir)
-csproj_path = File.join(project_dir, 'project-name.csproj')
-
-DebugLog "Project directory: '#{project_dir}'"
-DebugLog "Checking csproj:   '#{csproj_path}'"
-
-xml = File.read(csproj_path)
-
-csproj = Nokogiri::XML(xml)
-
-list = []
-
-# CSS Selectors for maximum coolness
-csproj.css('ItemGroup > Content > Link').each do |link|
-	# Get the repo-relative path for each file with unix-style path separators
-	path = File.join(relative_project_dir, link.text.gsub('\\', '/'))
-	result = `git ls-files --stage #{path}`
-	list.push(result) if not result.empty?
-end
-
-if list.empty? then
-	puts "Congratulations, this is a righteous commit!"
-end
-
-puts 'ERROR: The following files are csproj links, but exist in your repo...'
-list.each do |item|
-	puts item
-end
-puts 'Please delete them before committing. You may need to add them to .gitignore as well.'
-exit 1
