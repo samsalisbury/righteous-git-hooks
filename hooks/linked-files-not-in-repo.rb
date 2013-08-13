@@ -21,13 +21,17 @@ module RighteousGitHooks
 			puts "Checking csproj: '#{csproj_path}'"
 			csproj = Nokogiri::XML(File.read(csproj_path))
 			sins = []
-			# CSS Selectors for maximum coolness (also XPath sucks)
-			csproj.css('ItemGroup > Content > Link').each do |link|
-				# Get the repo-relative path for each file with unix-style path separators
-				path = File.join(@project_dir, link.text.gsub('\\', '/'))
-				# Check the file is not staged in Git. An empty response means it's not staged
-				result = `git ls-files --stage #{path}`
-				sins.push(result) unless result.empty?
+			
+			Dir.chdir(@git_root) do
+				# CSS Selectors for maximum coolness (also XPath sucks)
+				csproj.css('ItemGroup > Content > Link').each do |link|
+					# Get the repo-relative path for each file with unix-style path separators
+					path = File.join(@project_dir, link.text.gsub('\\', '/'))
+					# Check the file is not staged in Git. An empty response means it's not staged
+					puts link.text
+					result = `git ls-files --stage #{path}`
+					sins.push(result) unless result.empty?
+				end
 			end
 
 			return Result.success("Congratulations, this is a righteous commit!") if sins.empty?
