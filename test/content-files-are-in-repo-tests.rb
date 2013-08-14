@@ -23,16 +23,38 @@ hook_script = File.join(tests_root, "../hooks/go_go_righteous_git_hooks.rb")
 
 a_test_failed = 0
 
+# Setup
 Dir.chdir(File.expand_path(temp_dir)) do
-	# Arrange - copy files, create test repo and commit
 	`cp -r #{master_data_dir}/* #{temp_dir}`
 	`git init`
 	`git add -A`
 	`git commit -m 'Test commit.'`
+end
+
+# When all content files exist, message should be positive, exit code zero
+Dir.chdir(File.expand_path(temp_dir)) do
+	# Arrange - nothing to do this time...
+
 	# Act
-	result = `ruby #{hook_script} $PWD GitHooksTest GitHooksTest.csproj linked-files`
+	result = `ruby #{hook_script} $PWD GitHooksTest GitHooksTest.csproj content-files`
 	# Assert
 	if result.split("\n").last == 'Congratulations, this is a righteous commit!' then
+		puts 'Test passed!'
+	else
+		puts 'Test failed.'
+		a_test_failed += 1
+	end
+end
+
+# When a content file is missing, exit code 1, negative message
+Dir.chdir(File.expand_path(temp_dir)) do
+	# Arrange - delete a content file and try to commit
+	`rm #{temp_dir}/GitHooksTest/Program.cs`
+	`git add -A`
+	# Act
+	result = `ruby #{hook_script} $PWD GitHooksTest GitHooksTest.csproj content-files`
+	# Assert
+	if result.split("\n").last != 'Congratulations, this is a righteous commit!' then
 		puts 'Test passed!'
 	else
 		puts 'Test failed.'
