@@ -49,7 +49,8 @@ end
 # When a content file is missing, exit code 1, negative message
 Dir.chdir(File.expand_path(temp_dir)) do
 	# Arrange - delete a content file and try to commit
-	`rm #{temp_dir}/GitHooksTest/Program.cs`
+	puts "rm #{temp_dir}/GitHooksTest/SourceFile.txt"
+	`rm #{temp_dir}/GitHooksTest/SourceFile.txt`
 	`git add -A`
 	# Act
 	result = `ruby #{hook_script} $PWD GitHooksTest GitHooksTest.csproj content-files`
@@ -58,6 +59,7 @@ Dir.chdir(File.expand_path(temp_dir)) do
 		puts 'Test passed!'
 	else
 		puts 'Test failed.'
+		puts result
 		a_test_failed += 1
 	end
 end

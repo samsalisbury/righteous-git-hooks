@@ -13,7 +13,7 @@ module RighteousGitHooks
 
 		def make_it_so!()
 			
-			puts 'Checking linked files in your csproj are not in the repository...'
+			puts 'Checking content files are in your repository...'
 			csproj_path = File.join(@git_root, @project_dir, @csproj_filename)
 
 			return Result.error("Cannot find #{csproj_path}") unless File.exists? csproj_path
@@ -24,12 +24,14 @@ module RighteousGitHooks
 			
 			Dir.chdir(@git_root) do
 				# CSS Selectors for maximum coolness (also XPath sucks)
-				csproj.css('ItemGroup > Content[Link]').each do |link|
+				csproj.css('ItemGroup > Content[Include]').each do |content|
 					# Get the repo-relative path for each file with unix-style path separators
-					path = File.join(@project_dir, link['Include'].gsub('\\', '/'))
+					path = File.join(@project_dir, content['Include'].gsub('\\', '/'))
 					# Check the file is staged in Git. An empty response means it's not staged
-					puts link.text
+					puts "content = #{content}"
+					puts "COMMAND = git ls-files --stage #{path}"
 					result = `git ls-files --stage #{path}`
+					puts result
 					sins.push(path) if result.empty?
 				end
 			end
