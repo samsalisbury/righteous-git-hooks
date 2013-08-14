@@ -22,27 +22,30 @@ module RighteousGitHooks
 			csproj = Nokogiri::XML(File.read(csproj_path))
 			sins = []
 			
+			# Make list of all files from repo
+			# Make list of all files from csproj
+			# Make sure they're the same!
+
+			content_files = []
+			repo_files = []
+
 			Dir.chdir(@git_root) do
-				# CSS Selectors for maximum coolness (also XPath sucks)
-				csproj.css('ItemGroup > Content[Include]').each do |content|
-					# Get the repo-relative path for each file with unix-style path separators
-					path = File.join(@project_dir, content['Include'].gsub('\\', '/'))
-					# Check the file is staged in Git. An empty response means it's not staged
-					puts "content = #{content}"
-					puts "COMMAND = git ls-files --stage #{path}"
-					result = `git ls-files --stage #{path}`
-					puts result
-					sins.push(path) if result.empty?
+				repo_files = `git ls-files`.split("\n")
+			end
+
+			csproj.css('ItemGroup > Content[Include]').each do |content|
+				unless repo_files.include? File.join(@project_dir, content['Include'].gsub('\\', '/')) then
+					sins.push(content['Include'])
 				end
 			end
 
 			return Result.success("Congratulations, this is a righteous commit!") if sins.empty?
 
-			message = "\nYou have sinned! The following files are csproj links, but exist in your repo..."
+			message = "\nYou have sinned! The following files are csproj content files, but do not exist in your repo..."
 			sins.each do |sin|
 				message = message + "\n#{sin}"
 			end
-			message = message + "\nPlease delete them before committing. You may need to add them to .gitignore as well."
+			message = message + "\nPlease add them before committing."
 			
 			return Result.error(message)
 		end
