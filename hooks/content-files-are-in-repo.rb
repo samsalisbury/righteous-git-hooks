@@ -34,18 +34,21 @@ module RighteousGitHooks
 			end
 
 			csproj.css('ItemGroup > Content[Include]').each do |content|
-				unless repo_files.include? File.join(@project_dir, content['Include'].gsub('\\', '/')) then
-					sins.push(content['Include'])
+				
+				next unless (content > "DependentUpon").empty?
+				test_path = File.expand_path(File.join(@project_dir, content['Include'].gsub('\\', '/'))).gsub(@git_root + '/', '')
+				unless repo_files.include? test_path then
+					sins.push(test_path)
 				end
 			end
 
 			return Result.success("Congratulations, this is a righteous commit!") if sins.empty?
 
-			message = "\nYou have sinned! The following files are csproj content files, but do not exist in your repo..."
+			message = "\nYou have sinned! The following #{sins.length} files are csproj content files, but do not exist in your repo..."
 			sins.each do |sin|
 				message = message + "\n#{sin}"
 			end
-			message = message + "\nPlease add them before committing."
+			message = message + "\nPlease add all #{sins.length} files or specify that they're DependentUpon in the csproj before committing."
 			
 			return Result.error(message)
 		end
