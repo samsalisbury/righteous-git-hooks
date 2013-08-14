@@ -1,4 +1,5 @@
 require 'nokogiri'
+require 'uri'
 require_relative 'result'
 
 module RighteousGitHooks
@@ -39,7 +40,7 @@ module RighteousGitHooks
 				# we need some way to include all csproj files in the search.
 				next if content['Include'][0..1] == '..'
 				next unless (content > "DependentUpon").empty?
-				test_path = File.expand_path(File.join(@project_dir, content['Include'].gsub('\\', '/'))).gsub(@git_root + '/', '')
+				test_path = File.expand_path(File.join(@project_dir, URI.unescape(content['Include']).gsub('\\', '/'))).gsub(@git_root + '/', '')
 				unless repo_files.include? test_path then
 					sins.push(test_path)
 				end
