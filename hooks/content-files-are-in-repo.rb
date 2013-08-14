@@ -34,7 +34,10 @@ module RighteousGitHooks
 			end
 
 			csproj.css('ItemGroup > Content[Include]').each do |content|
-				
+				# Issue: We are just checking individual projects, so we can't check
+				# content files in other projects where they are generated in those projects
+				# we need some way to include all csproj files in the search.
+				next if content['Include'][0..1] == '..'
 				next unless (content > "DependentUpon").empty?
 				test_path = File.expand_path(File.join(@project_dir, content['Include'].gsub('\\', '/'))).gsub(@git_root + '/', '')
 				unless repo_files.include? test_path then
