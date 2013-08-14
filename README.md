@@ -1,6 +1,8 @@
 # Righteous Git Hooks
 Useful Git hooks for Visual Studio projects on Windows
 
+_Note: This project is in its infancy, I need to wrap the tests in some kind of framework, add more hooks and tests, and build the installer. I'll probably make this available as a gem at some point as well..._
+
 ## What?
 These hooks are born out of frustration working with large complicated Visual Studio solutions, in large teams, where there are constant issues, such as:
 
