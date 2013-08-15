@@ -12,13 +12,13 @@ module RighteousGitHooks
 			@csproj_filename = csproj_filename
 		end
 
-		def make_it_so!()
+		def adjudge!()
 			
 			puts 'Checking content files are in your repository...'
 			csproj_path = File.join(@git_root, @project_dir, @csproj_filename)
-
+			
 			return Result.error("Cannot find #{csproj_path}") unless File.exists? csproj_path
-
+			
 			puts "Checking csproj: '#{csproj_path}'"
 			csproj = Nokogiri::XML(File.read(csproj_path))
 			sins = []
@@ -26,14 +26,14 @@ module RighteousGitHooks
 			# Make list of all files from repo
 			# Make list of all files from csproj
 			# Make sure they're the same!
-
+			
 			content_files = []
 			repo_files = []
-
+			
 			Dir.chdir(@git_root) do
 				repo_files = `git ls-files`.split("\n")
 			end
-
+			
 			csproj.css('ItemGroup > Content[Include]').each do |content|
 				# Issue: We are just checking individual projects, so we can't check
 				# content files in other projects where they are generated in those projects

@@ -11,7 +11,7 @@ module RighteousGitHooks
 			@csproj_filename = csproj_filename
 		end
 
-		def make_it_so!()
+		def adjudge!()
 			
 			puts 'Checking linked files in your csproj are not in the repository...'
 			csproj_path = File.join(@git_root, @project_dir, @csproj_filename)

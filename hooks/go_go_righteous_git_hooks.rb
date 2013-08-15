@@ -18,11 +18,11 @@ results = []
 
 if checker == 'all' or checker == 'linked-files' then
 	the_righteous_linked_files_checker = LinkedFilesChecker.new(git_repo_dir, project_dir, csproj_filename)
-	results.push the_righteous_linked_files_checker.make_it_so!
+	results.push the_righteous_linked_files_checker.adjudge!
 end
 if checker == 'all' or checker == 'content-files' then
 	the_righteous_content_files_checker = ContentFilesChecker.new(git_repo_dir, project_dir, csproj_filename)
-	results.push the_righteous_content_files_checker.make_it_so!
+	results.push the_righteous_content_files_checker.adjudge!
 end
 
 results.each { |r| puts r.message }
