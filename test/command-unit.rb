@@ -46,9 +46,9 @@ module CommandUnit
       @tests.each do |test|
         puts "When I #{test.when_i_text}"
         context = {}
-        test.set_up.call(context) unless test.set_up.nil?
+        @set_up_block.call(context) unless @set_up_block.nil?
         test.when_i_block.call(context) unless test.when_i_block.nil?
-        puts 'I expect that:'
+        print 'I expect '
         test.expectations.each do |expectation|
           puts expectation.desc
           expectation.block.call(context) unless expectation.block.nil?
