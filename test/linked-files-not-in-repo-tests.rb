@@ -19,7 +19,7 @@ end
 tests_root = File.expand_path(File.dirname(__FILE__))
 
 master_data_dir = File.join(tests_root, 'GitHooksTestSolution')
-hook_script = File.join(tests_root, "../hooks/go_go_righteous_git_hooks.rb")
+hook_script = File.join(tests_root, "../lib/hooks/go_go_righteous_git_hooks.rb")
 
 a_test_failed = 0
 
