@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name              = "righteous"
-  s.version           = "0.0.0"
+  s.version           = "0.0.1.pre"
   s.platform          = Gem::Platform::RUBY
   s.author           = "Samuel R. Salisbury"
   s.email             = "samsalisbury@gmail.com"
